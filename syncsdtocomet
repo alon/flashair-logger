@@ -235,6 +235,7 @@ end
 
 function main()
 	print("starting sync")
+    os.execute('mkdir -p ' .. SYNC_DIR)
 	files = sd_dir_read("/CSVFILES/LOG/")
     local k
     local v
