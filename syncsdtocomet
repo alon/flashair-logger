@@ -55,8 +55,9 @@ end
 function pipe_simple(input, cmd)
     os.execute('[ ! -e ' .. FIFO .. ' ] && mkfifo ' .. FIFO)
     local pid = background_write(FIFO, input)
-    os.execute(cmd .. ' < ' .. FIFO)
+    local success, reason, status = os.execute(cmd .. ' < ' .. FIFO)
     posix.wait(pid)
+    return status
 end
 
 
@@ -229,7 +230,7 @@ end
 -- avoiding a temporary file (sd can be much larger then the local storage on the openwrt)
 function sync(filename, contents)
     local cmd = 'ssh ' .. SSH_OPTS .. ' -l ' .. SSH_USER .. ' ' .. SSH_HOST .. ' "cat > ' .. TARGET_PATH .. '/' .. filename .. '"'
-    pipe_simple(contents, cmd)
+    return pipe_simple(contents, cmd)
 end
 
 function main()
@@ -241,8 +242,11 @@ function main()
 		if not synced(v.filename, v.date, v.time) then
             print("syncing " .. v.filename .. ' (' .. v.size .. ')')
 			file_body = sd_csvfile_get(v.filename)
-            sync(v.filename, file_body)
-            update_sync(v.filename, v.date, v.time)
+            if sync(v.filename, file_body) ~= 0 then
+                print("ERROR syncing " .. v.filename .. ", skipping it (not updating sync file)")
+            else
+                update_sync(v.filename, v.date, v.time)
+            end
         end
 	end
 	print("ended sync")
