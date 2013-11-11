@@ -1,0 +1,2 @@
+really don't keep file in memory - right now sdget is used twice.
+use gzip on both sides. 10x compression for CSV files on card.
