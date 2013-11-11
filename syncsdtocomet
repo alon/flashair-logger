@@ -57,7 +57,11 @@ function pipe_simple(input, cmd)
     local pid = background_write(FIFO, input)
     local success, reason, status = os.execute(cmd .. ' < ' .. FIFO)
     posix.wait(pid)
-    return status
+    if success == 0 then
+        return 0
+    else
+        return status
+    end
 end
 
 
