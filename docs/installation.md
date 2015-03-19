@@ -12,7 +12,10 @@ The sd carrying device (SCD) logs data every set amount of seconds about wind di
 # Start with an empty SLboat_Mod TP-LINK TL-WR703N
 # connect ethernet to laptop, laptop uses dhcp
 # remove ~/.ssh/known_hosts offending lines for ssh access
-# ssh into it. default password is unset, with telnet enabled. Login via telnet, set password. Add ssh pub key via: http://192.168.1.1/cgi-bin/luci/;stok=050e6ecb7ab80178f16ec1b9aa83b690/admin/system/admin (just an example, stok will be different)
+# ssh into it. default password is unset, with telnet enabled. Login via telnet, set password. Add ssh pub key via: http://192.168.1.1/cgi-bin/luci/;stok=050e6ecb7ab80178f16ec1b9aa83b690/admin/system/admin (just an example, stok will be different) or manually via concatenating your public key (openssh .pub file):
+
+ ssh root@openwrt "echo $(cat ~/.ssh/id_rsa.pub) >>/etc/dropbear/authorized_keys;chmod 0600 /etc/dropbear/authorized_keys"
+
 # setup networking via host
 ## If host is connected via wireless, and in the hackerspace, and host has IP of 192.168.1.239:
 ### host: masquerade_via_wlp3s0 (see below)
