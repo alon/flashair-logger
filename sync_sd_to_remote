@@ -23,7 +23,7 @@ if arg[1] then
     dofile(arg[1])
 end
 
-print("Welcome to sync sd to comet")
+print("Welcome to sync sd to remote")
 print("SD:         " .. SDCARD_IP .. ':' .. SDCARD_PORT)
 print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
 print("SSH_OPTS:   " .. SSH_OPTS)
@@ -104,7 +104,7 @@ function sdget_stream(path)
     return s
 end
 
--- Skip HTTP headers. excercise in writing a state machine in lua.
+-- Skip HTTP headers. exercise in writing a state machine in lua.
 --
 -- Could be replaced with
 -- the following if you have the memory for the whole HTTP response:
