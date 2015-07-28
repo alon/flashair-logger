@@ -22,14 +22,14 @@ Installing the router
 
  `ssh root@openwrt "echo $(cat ~/.ssh/id_rsa.pub) >>/etc/dropbear/authorized_keys;chmod 0600 /etc/dropbear/authorized_keys"`
 
- * setup networking via host
-  * If host is connected via wireless, and in the hackerspace, and host has IP of 192.168.1.239:
-   * host: `masquerade_via_wlp3s0` (see below)
-   * host: `sudo iptables -F` (fixme)
-   * wrt: `route add default gw 192.168.1.239`
-   * wrt: `echo nameserver 10.81.2.1 > /etc/resolv.conf`
- * change hostname to melogger: `admin/system/system`
- * set timezone to Beirut: `admin/system/system`
+  * setup networking via host
+    * If host is connected via wireless, and in the hackerspace, and host has IP of 192.168.1.239:
+      * host: `masquerade_via_wlp3s0` (see below)
+      * host: `sudo iptables -F` (fixme)
+      * wrt: `route add default gw 192.168.1.239`
+      * wrt: `echo nameserver 10.81.2.1 > /etc/resolv.conf`
+  * change hostname to melogger: `admin/system/system`
+  * set timezone to Beirut: `admin/system/system`
 `
  opkg update
  opkg install packages for gsm and lua:
