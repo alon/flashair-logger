@@ -182,8 +182,8 @@ function sd_dir_read(path)
         -- print(k .. ': ' .. v)
         if k > 1 then
             parts = split(v, ',')
-            root, filename, size, whatever, date, time = parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
-            -- print(root .. ', ' .. filename .. ', ' .. size)
+            root, filename, size, whatever, date, time = parts[1], parts[2], parts[3], parts[4], parts[5], string.format('%d', parts[6])
+            -- print(root .. ', ' .. filename .. ', ' .. size .. ', ' .. date .. ', ' .. time)
             if filename then
                 print(filename)
                 table.insert(files, {["filename"] = filename,
