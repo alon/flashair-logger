@@ -9,7 +9,7 @@
 ]]
 
 -- Development defaults, use sdcardemul.py as the server.
-SDCARD_IP = "127.0.0.1"
+SDCARD_HOST = "127.0.0.1"
 SDCARD_PORT = 8000
 TARGET_PATH = "/home/alon/cometme/data-logger"
 SYNC_DIR = "/home/alon/cometme/sync"
@@ -24,7 +24,7 @@ if arg[1] then
 end
 
 print("Welcome to sync sd to remote")
-print("SD:         " .. SDCARD_IP .. ':' .. SDCARD_PORT)
+print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
 print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
 print("SSH_OPTS:   " .. SSH_OPTS)
 print("SYNC dir:   " .. SYNC_DIR)
@@ -97,10 +97,16 @@ end
 -- The socket.http module isn't liked by the Air card httpd, so just copy the headers
 -- from wget.
 function sdget_stream(path)
-	s = socket.connect(SDCARD_IP, SDCARD_PORT)
+	s = socket.connect(SDCARD_HOST, SDCARD_PORT)
     assert(s ~= nil, "failed to connect to sd card")
-	-- XXX We use Wget/1.14 user agent, can try to change this.
-	s:send("GET " .. path .. " HTTP/1.1\r\nUser-Agent: Wget/1.14\r\nAccept: */*\r\nHost: 192.168.0.1:9999\r\nConnection: Keep-Alive\r\n\r\n")
+    request = ('GET ' .. path .. ' HTTP/1.1\r\n' ..
+               'User-Agent: curl/7.40.0\r\n' ..
+               'Host: ' .. SDCARD_HOST .. '\r\n' ..
+               'Accept: */*\r\n' ..
+               --'Connection: Keep-Alive\r\n' ..
+               '\r\n')
+    -- print(request .. '\n\n')
+	s:send(request)
     return s
 end
 
@@ -154,8 +160,10 @@ end
 
 function sdget(path)
     s = sdget_stream(path)
-    skip_headers(s)
+    headers = skip_headers(s)
+    -- print(headers)
 	body = s:receive("*a")
+    -- print(body)
 	return body
 end
 
@@ -167,16 +175,21 @@ end
 -- each file. date & time are not actually those, they are the top and bottom 16 bits of the seconds
 -- since epoch of the file. They are only used comparitavely, so it doesn't matter.
 function sd_dir_read(path)
-	-- wget -O - -q http://192.168.0.1/$1 | grep -e '^wlansd\[' | sed -e 's/wlansd\[[0-9]*\]="//' | sed -e 's/";//'
-	body = sdget(path)
+    -- Uses command.cgi: https://www.flashair-developers.com/en/documents/api/commandcgi/
+	body = sdget('/command.cgi?op=100&DIR=' .. path)
 	files = {}
 	for k, v in ipairs((split(body, '\n'))) do
-		-- wlansd[154]="/CSVFILES/LOG,LG130512.CSV,204063,32,17068,49013";
-		_, _, _, root, filename, size, whatever, date, time = string.find(v, 'wlansd%[(%d+)%]="([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)";');
-		if filename then
-			table.insert(files, {["filename"] = filename,
-				["size"] = size, ["date"] = date, ["time"] = time})
-		end
+        -- print(k .. ': ' .. v)
+        if k > 1 then
+            parts = split(v, ',')
+            root, filename, size, whatever, date, time = parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
+            -- print(root .. ', ' .. filename .. ', ' .. size)
+            if filename then
+                print(filename)
+                table.insert(files, {["filename"] = filename,
+                    ["size"] = size, ["date"] = date, ["time"] = time})
+            end
+        end
 	end
 	return files
 end
@@ -252,7 +265,7 @@ end
 function main()
 	print("starting sync")
     os.execute('mkdir -p ' .. SYNC_DIR)
-	files = sd_dir_read("/CSVFILES/LOG/")
+	files = sd_dir_read("/CSVFILES/LOG")
     local k
     local v
 	for k, v in ipairs(files) do
