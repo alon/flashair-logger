@@ -30,28 +30,24 @@ def config_to_bytes(config, section, keyvals):
     Update existing values in config.section, then append the ones left.
     """
     out = BytesIO()
-    def write_keyvals():
-        for key, val in keyvals.items():
-            out.write(b'%s=%s\r\n' % (key, val))
-        keyvals.clear()
+    # Append a <section> section if missing
+    if len([1 for existing_section, ignored in config if existing_section == section]) == 0:
+        config.append((section, ['']))
     for existing_section, section_lines in config:
         out.write(b'[%s]\r\n' % existing_section)
+        for line in section_lines:
+            if isinstance(line, list):
+                key, val = line
+                if existing_section == section and key in keyvals:
+                    val = keyvals[key]
+                    del keyvals[key]
+                out.write(b'%s=%s\r\n' % (key, val))
+            else:
+                out.write(b'%s\r\n' % line)
         if existing_section == section:
-            for line in section_lines:
-                if isinstance(line, list):
-                    key, val = line
-                    if key in keyvals:
-                        val = keyvals[key]
-                        del keyvals[key]
-                    out.write(b'%s=%s\r\n' % (key, val))
-                else:
-                    out.write(b'%s\r\n' % line)
-            if len(keyvals) > 0:
-                write_keyvals()
-    if len(keyvals) > 0:
-        # section didn't exist before, write it from scratch
-        out.write(b'[%s]\r\n'% section)
-        write_keyvals()
+            for key, val in keyvals.items():
+                out.write(b'%s=%s\r\n' % (key, val))
+            keyvals.clear()
     out.seek(0)
     return out.read()
 
