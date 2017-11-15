@@ -13,7 +13,11 @@ Acronyms used:
 FAv3 - FlashAir v3 by Toshiba. The only supported hardware (used to support v2,
 need to check if v2 supports the command.cgi API. Downloading files is the same,
 i.e.
+
 http://192.168.0.1/<full_path>
+
+Command API documentation:
+https://www.flashair-developers.com/en/documents/api/commandcgi/
 
 """
 
@@ -30,7 +34,7 @@ encoding = sys.getfilesystemencoding()
 
 class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
     """
-    Implement v3 observed API (TBD: is this documented anywhere?)
+    Implement v3 Command API op for directory listing
 
     There are two ways to go:
      - parse the HTML page (specifically the script part) returned
