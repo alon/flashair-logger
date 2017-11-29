@@ -6,6 +6,14 @@
  This file is in the public domain. It's been mostly a learning experience with
  lua and it is not very pretty. I hope it will be some help to someone
  nontheless!
+
+TODO:
+ - all file writing must be checked for errors (open, write, read)
+ - if card is not accessed, send server a notification
+  - ssh echo "could not read card <DATE> - not seeing wifi/http error/other reason" > TARGET_PATH/logger_error.txt
+ - if any fails, fallback to syncing all files without caching test
+ - use a single file for all cache, write a line per file in it (can sort it and then can do search on it)
+
 ]]
 
 -- Development defaults, use sdcardemul.py as the server.
