@@ -26,21 +26,6 @@ SSH_USER = 'alon'
 SSH_HOST = 'localhost'
 FIFO = "/home/alon/cometme/fifo"
 
--- Load config file
-if arg[1] then
-    dofile(arg[1])
-end
-
-print("Welcome to sync sd to remote")
-print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
-print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
-print("SSH_OPTS:   " .. SSH_OPTS)
-print("SYNC dir:   " .. SYNC_DIR)
-print("TARGET dir: " .. TARGET_PATH)
-if DEBUG then
-    print("!!! DEBUG !!!")
-end
-
 -- http (socket.http) produces "Malformed request" errors with the sd httpd server,
 -- so just use socket directly.
 
@@ -271,6 +256,21 @@ function sync(filename, contents)
 end
 
 function main()
+    -- Load config file
+    if arg[1] then
+        dofile(arg[1])
+    end
+
+    print("Welcome to sync sd to remote")
+    print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
+    print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
+    print("SSH_OPTS:   " .. SSH_OPTS)
+    print("SYNC dir:   " .. SYNC_DIR)
+    print("TARGET dir: " .. TARGET_PATH)
+    if DEBUG then
+        print("!!! DEBUG !!!")
+    end
+
 	print("starting sync")
     os.execute('mkdir -p ' .. SYNC_DIR)
 	files = sd_dir_read("/CSVFILES/LOG")
