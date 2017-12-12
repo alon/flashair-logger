@@ -16,6 +16,8 @@ TODO:
 
 ]]
 
+local module = {}
+
 -- Development defaults, use sdcardemul.py as the server.
 SDCARD_HOST = "127.0.0.1"
 SDCARD_PORT = 8000
@@ -29,8 +31,9 @@ FIFO = "/home/alon/cometme/fifo"
 -- http (socket.http) produces "Malformed request" errors with the sd httpd server,
 -- so just use socket directly.
 
-socket = require("socket")
-posix = require("posix")
+local socket = require("socket")
+local posix = require("posix")
+local os = require('os')
 
 -- We open a fifo so we must background it or be blocked.
 function background_write(filename, text)
@@ -255,7 +258,7 @@ function sync(filename, contents)
     return pipe_simple(contents, cmd)
 end
 
-function main()
+function module.main()
     -- Load config file
     if arg[1] then
         dofile(arg[1])
@@ -290,4 +293,4 @@ function main()
 	print("ended sync")
 end
 
-main()
+return module

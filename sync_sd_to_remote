@@ -1,0 +1,3 @@
+#!/usr/bin/env lua
+local sync_sd_to_remote = require 'sync_sd_to_remote'
+sync_sd_to_remote.main()
