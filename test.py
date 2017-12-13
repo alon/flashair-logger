@@ -26,11 +26,11 @@ SDCARD_PORT={SDCARD_PORT}
 SSH_USER='{SSH_USER}'
 TARGET_PATH='{TARGET_PATH}'
 SYNC_DIR='{SYNC_DIR}'
-DEBUG=true
+DEBUG={DEBUG}
 """
 
 
-def create_config(root_dir):
+def create_config(root_dir, debug):
     filename = os.path.join(root_dir, 'config.lua')
     SDCARD_HOST = 'localhost'
     SDCARD_PORT = 8000
@@ -38,6 +38,7 @@ def create_config(root_dir):
     SSH_HOST = '127.0.0.1'
     TARGET_PATH = '/home/flashair/test'
     SYNC_DIR = os.path.join(root_dir, 'sync_dir')
+    DEBUG='true' if debug else 'false'
     as_flashair(f'rm -Rf {TARGET_PATH}')
     as_flashair(f'mkdir -p {TARGET_PATH}')
     with open(filename, 'w+') as fd:
@@ -63,7 +64,7 @@ def is_same(base1, base2):
 
 def run_sdcardemul_syncroot(syncroot):
     # assemble
-    config_filename, target_path = create_config(syncroot)
+    config_filename, target_path = create_config(syncroot, debug=False)
     source_dir = os.path.join(syncroot, 'sd')
     csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
     os.makedirs(csv_dir)
