@@ -16,12 +16,12 @@ package.loaded.io = Spy(io_orig)
 local orig_os = require 'os'
 
 local os = require 'oswrap'
-print(string.format('os.execute: %s', os.execute))
 
 sync_sd_to_remote = require 'sync_sd_to_remote'
 
 DEBUG=true
 
+print("Running test")
 sync_sd_to_remote.main()
 
 log = require('calllog')

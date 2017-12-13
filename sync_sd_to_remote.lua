@@ -21,6 +21,7 @@ local socket = require("socket")
 local posix = require("posix")
 local os = require('oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
 local io = require('iowrap')
+local fa_sync = require('fa_sync')
 
 local module = {}
 
@@ -189,75 +190,6 @@ function sd_dir_read(path)
 	return files
 end
 
-
-function get_sorted_keys(o)
-    local keys = {}
-    for k, v in pairs(o) do
-        table.insert(keys, k)
-    end
-    table.sort(keys)
-    return keys
-end
-
-
-function serialize_helper(f, o)
-	if type(o) == "number" then
-		f:write(o)
-	elseif type(o) == "string" then
-		f:write(string.format("%q", o))
-	elseif type(o) == "table" then
-		f:write("{\n")
-        local k
-        local v
-        -- serialize sorted values to make serialization deterministic for testing
-        local sorted_keys = get_sorted_keys(o)
-		for i, k in ipairs(sorted_keys) do
-            local v = o[k]
-			f:write('["' .. k .. '"] = ')
-            DEBUGP(function () return string.format("serializing field %s", k) end)
-			serialize_helper(f, v)
-			f:write(",\n")
-		end
-		f:write("}\n")
-	else
-		error("cannot serialize a " .. type(o))
-	end
-end
-
-function serialize(f, o)
-    f:write("local data = ")
-    serialize_helper(f, o)
-    f:write("return data;\n")
-end
-
--- Return true if the file has been synced to the target, checked via a local file
--- that includes the expected file size and date
-function synced(filename, date, time)
-    local sync_path = SYNC_DIR .. "/" .. filename
-	local f = io.open(sync_path, "r+")
-	if not f then
-        DEBUGP(function () return string.format("no sync file %s", sync_path) end)
-        return false
-    end
-    function loader()
-        local ret = f:read('*a')
-        DEBUGP(function () return string.format('loader = %s', ret) end)
-        return ret
-    end
-    local saved = load(loader())()
-    DEBUGP(function () return string.format("saved date = %s, time = %s", saved.date, saved.time) end)
-    return saved.date == date and saved.time == time
-end
-
-function update_sync(filename, date, time)
-    local sync_path = SYNC_DIR .. "/" .. filename
-    local f = io.open(sync_path, "w+")
-    -- TODO: check for f nil (open failure - ran out of disk space in production, permissions in test), fallback to syncing everything
-    local data = {["date"] = date, ["time"] = time}
-    serialize(f, data)
-    f:close()
-end
-
 function array_concat(t1, t2)
     for i=1, #t2 do
         t1[#t1 + 1] = t2[i]
@@ -299,16 +231,19 @@ function module.main()
 	print("starting sync")
     os.execute('mkdir -p ' .. SYNC_DIR)
 	files = sd_dir_read("/CSVFILES/LOG")
+
+    local syncer = fa_sync.Syncer(SYNC_DIR)
+
     local k
     local v
 	for k, v in ipairs(files) do
-		if not synced(v.filename, v.date, v.time) then
+		if not syncer:synced(v.filename, v.date, v.time) then
             print("syncing " .. v.filename .. ' (' .. v.size .. ')')
 			file_body = sd_csvfile_get(v.filename)
             if sync(v.filename, file_body) ~= 0 then
                 print("ERROR syncing " .. v.filename .. ", skipping it (not updating sync file)")
             else
-                update_sync(v.filename, v.date, v.time)
+                syncer:update(v.filename, v.date, v.time)
             end
         end
 	end
