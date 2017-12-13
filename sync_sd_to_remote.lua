@@ -22,7 +22,7 @@ local posix = require("posix")
 local os = require('oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
 local io = require('iowrap')
 local fa_sync = require('fa_sync')
-local sshpipe = require('sshpipe')
+local fa_pipe = require('fa_pipe')
 local fa_debug = require('fa_debug')
 
 local module = {}
@@ -172,7 +172,7 @@ end
 function sync(filename, contents)
     local cmd = 'ssh ' .. SSH_OPTS .. ' -l ' .. SSH_USER .. ' ' .. SSH_HOST .. ' "cat > ' .. TARGET_PATH .. '/' .. filename .. '"'
     DEBUGP(function () return cmd end)
-    return sshpipe.pipe_simple(contents, cmd)
+    return fa_pipe.pipe_simple(contents, cmd)
 end
 
 function module.main()
