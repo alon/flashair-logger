@@ -201,9 +201,7 @@ end
 -- avoiding a temporary file (sd can be much larger then the local storage on the openwrt)
 function sync(filename, contents)
     local cmd = 'ssh ' .. SSH_OPTS .. ' -l ' .. SSH_USER .. ' ' .. SSH_HOST .. ' "cat > ' .. TARGET_PATH .. '/' .. filename .. '"'
-    if DEBUG then
-        cmd = 'echo ' .. cmd
-    end
+    DEBUGP(function () return cmd end)
     return pipe_simple(contents, cmd)
 end
 
@@ -223,7 +221,7 @@ function module.main()
     print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
     print("SSH_OPTS:   " .. SSH_OPTS)
     print("SYNC dir:   " .. SYNC_DIR)
-    print("TARGET dir: " .. TARGET_PATH)
+    print("TARGET path: " .. TARGET_PATH)
     if DEBUG then
         print("!!! DEBUG !!!")
     end
