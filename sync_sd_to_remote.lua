@@ -16,24 +16,27 @@ TODO:
 
 ]]
 
+
+local socket = require("socket")
+local posix = require("posix")
+local os = require('oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
+local io = require('iowrap')
+
 local module = {}
 
 -- Development defaults, use sdcardemul.py as the server.
 SDCARD_HOST = "127.0.0.1"
 SDCARD_PORT = 8000
-TARGET_PATH = "/home/alon/cometme/data-logger"
-SYNC_DIR = "/home/alon/cometme/sync"
+TARGET_PATH = "/home/flashair/data-logger"
+SYNC_DIR = "/tmp/sync"
 SSH_OPTS = ""
-SSH_USER = 'alon'
+SSH_USER = 'flashair'
 SSH_HOST = 'localhost'
-FIFO = "/home/alon/cometme/fifo"
+FIFO = "/tmp/fifo"
+DEBUG = false
 
 -- http (socket.http) produces "Malformed request" errors with the sd httpd server,
 -- so just use socket directly.
-
-local socket = require("socket")
-local posix = require("posix")
-local os = require('os')
 
 -- We open a fifo so we must background it or be blocked.
 function background_write(filename, text)
@@ -55,13 +58,9 @@ function pipe_simple(input, cmd)
     os.execute('[ ! -e ' .. FIFO .. ' ] && mkfifo ' .. FIFO)
     local pid = background_write(FIFO, input)
     local success, reason, status = os.execute(cmd .. ' < ' .. FIFO)
-    if DEBUG then
-        print("pid = " .. tostring(pid))
-    end
+    DEBUGP(function () return string.format("pid = %s", pid) end)
     posix.wait(pid)
-    if DEBUG then
-        print("status = " .. tostring(status) .. "; sucess = " .. tostring(success) .. "; reason = " .. tostring(reason))
-    end
+    DEBUGP(function () return string.format("status = %s; success = %s; reason = %s", status, success, reason) end)
     if success == 0 then
         return 0
     else
@@ -190,6 +189,17 @@ function sd_dir_read(path)
 	return files
 end
 
+
+function get_sorted_keys(o)
+    local keys = {}
+    for k, v in pairs(o) do
+        table.insert(keys, k)
+    end
+    table.sort(keys)
+    return keys
+end
+
+
 function serialize_helper(f, o)
 	if type(o) == "number" then
 		f:write(o)
@@ -199,9 +209,12 @@ function serialize_helper(f, o)
 		f:write("{\n")
         local k
         local v
-		for k, v in pairs(o) do
-			f:write('["' .. k, '"] = ')
-            --print("DEBUG: serializing field " .. k)
+        -- serialize sorted values to make serialization deterministic for testing
+        local sorted_keys = get_sorted_keys(o)
+		for i, k in ipairs(sorted_keys) do
+            local v = o[k]
+			f:write('["' .. k .. '"] = ')
+            DEBUGP(function () return string.format("serializing field %s", k) end)
 			serialize_helper(f, v)
 			f:write(",\n")
 		end
@@ -223,19 +236,23 @@ function synced(filename, date, time)
     local sync_path = SYNC_DIR .. "/" .. filename
 	local f = io.open(sync_path, "r+")
 	if not f then
-        --print("DEBUG: no sync file " .. sync_path)
+        DEBUGP(function () return string.format("no sync file %s", sync_path) end)
         return false
     end
     function loader()
-        return f:read('*a')
+        local ret = f:read('*a')
+        DEBUGP(function () return string.format('loader = %s', ret) end)
+        return ret
     end
-    local saved = load(loader)()
+    local saved = load(loader())()
+    DEBUGP(function () return string.format("saved date = %s, time = %s", saved.date, saved.time) end)
     return saved.date == date and saved.time == time
 end
 
 function update_sync(filename, date, time)
     local sync_path = SYNC_DIR .. "/" .. filename
     local f = io.open(sync_path, "w+")
+    -- TODO: check for f nil (open failure - ran out of disk space in production, permissions in test), fallback to syncing everything
     local data = {["date"] = date, ["time"] = time}
     serialize(f, data)
     f:close()
@@ -264,6 +281,11 @@ function module.main()
         dofile(arg[1])
     end
 
+    if DEBUG then
+        _G.DEBUGP = function (f) print(string.format('DEBUG: %s', f())) end
+    else
+        _G.DEBUGP = function (f) end -- do nothing
+    end
     print("Welcome to sync sd to remote")
     print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
     print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
