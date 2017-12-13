@@ -1,77 +1,59 @@
 local module = {}
+local fa_pipe = require('fa_pipe')
 
-function get_sorted_keys(o)
-    local keys = {}
-    for k, v in pairs(o) do
-        table.insert(keys, k)
-    end
-    table.sort(keys)
-    return keys
+
+function string:split(sep)
+    -- http://lua-users.org/wiki/SplitJoin
+    local sep, fields = sep or ":", {}
+    local pattern = string.format("([^%s]+)", sep)
+    self:gsub(pattern, function(c) fields[#fields+1] = c end)
+    return fields
 end
 
 
-function serialize_helper(f, o)
-	if type(o) == "number" then
-		f:write(o)
-	elseif type(o) == "string" then
-		f:write(string.format("%q", o))
-	elseif type(o) == "table" then
-		f:write("{\n")
-        local k
-        local v
-        -- serialize sorted values to make serialization deterministic for testing
-        local sorted_keys = get_sorted_keys(o)
-		for i, k in ipairs(sorted_keys) do
-            local v = o[k]
-			f:write('["' .. k .. '"] = ')
-            DEBUGP(function () return string.format("serializing field %s", k) end)
-			serialize_helper(f, v)
-			f:write(",\n")
-		end
-		f:write("}\n")
-	else
-		error("cannot serialize a " .. type(o))
-	end
-end
-
-function serialize(f, o)
-    f:write("local data = ")
-    serialize_helper(f, o)
-    f:write("return data;\n")
-end
-
-
-function module.Syncer(sync_dir)
-    local syncer = {sync_dir=sync_dir}
-    -- Return true if the file has been synced to the target, checked via a local file
-    -- that includes the expected file size and date
-    function syncer.synced(self, filename, date, time)
-        local sync_path = self.sync_dir .. "/" .. filename
-        local f = io.open(sync_path, "r+")
-        if not f then
-            DEBUGP(function () return string.format("no sync file %s", sync_path) end)
-            return false
+function module.Syncer(ssh_opts, ssh_user, ssh_host, target_dir)
+    local syncer = {
+        ssh_opts=ssh_opts,
+        ssh_user=ssh_user,
+        ssh_host=ssh_host,
+        target_dir=target_dir,
+    }
+    function syncer.need_updating(self, files)
+        --[[
+        Connect by ssh to host, check which of the given files need updating, based
+        on same filename, different date or size
+        --]]
+        
+		local txt = {}
+        local ins = function (l) table.insert(txt, l) end
+        ins('files = []')
+        ins('import os')
+        ins(string.format('os.chdir("%s")', self.target_dir))
+        for i, v in ipairs(files) do
+            table.insert(txt, string.format('files.append(["%s", "%s", "%s", "%s"])',
+                         v.filename, v.size, v.date, v.time))
         end
-        function loader()
-            local ret = f:read('*a')
-            DEBUGP(function () return string.format('loader = %s', ret:gsub('\n', '\\n')) end)
-            return ret
-        end
-        local saved = load(loader())()
-        DEBUGP(function () return string.format("saved date = %s, time = %s", saved.date, saved.time) end)
-        return saved.date == date and saved.time == time
-    end
-
-    function syncer.update(self, filename, date, time)
-        local sync_path = self.sync_dir .. "/" .. filename
-        local f = io.open(sync_path, "w+")
-        -- TODO: check for f nil (open failure - ran out of disk space in production, permissions in test), fallback to syncing everything
-        local data = {["date"] = date, ["time"] = time}
-        serialize(f, data)
-        f:close()
+        -- TODO: use date & time as well. right now we just assume size is good enough
+        ins('ret = []')
+        ins('for filename, size, date, time in files:')
+        ins('    if not os.path.exists(filename):')
+        ins('        ret.append(filename)')
+        ins('        continue')
+        ins('    s = os.stat(filename)')
+        ins('    if str(s.st_size) != size:')
+        ins('        ret.append(filename)')
+        ins('print(",".join(ret))')
+        local input = table.concat(txt, '\n')
+        DEBUGP(function () return input end)
+        local output = fa_pipe.pipe_simple(
+            input,
+            string.format('ssh %s -l %s %s python3', self.ssh_opts, self.ssh_user, self.ssh_host),
+            true)
+        return ipairs(output:split(','))
     end
 
     return syncer
 end
+
 
 return module

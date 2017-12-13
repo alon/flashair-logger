@@ -18,7 +18,7 @@ function background_write(filename, text)
     local pid, err = posix.fork()
     assert(pid ~= nil, "fork() failed")
     if pid == 0 then
-        DEBUGP(function () return string.format('if parent; filename = %s', filename) end)
+        DEBUGP(function () return string.format('in parent; filename = %s', filename) end)
         local f = io.open(filename, "w")
         f:write(text)
         f:close()

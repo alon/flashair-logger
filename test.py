@@ -61,31 +61,53 @@ def is_same(base1, base2):
     return True
 
 
+def run_sdcardemul_syncroot(syncroot):
+    # assemble
+    config_filename, target_path = create_config(syncroot)
+    source_dir = os.path.join(syncroot, 'sd')
+    csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
+    os.makedirs(csv_dir)
+    os.system(f'./sdcardemul.py --dir {source_dir} &')
+    filenames = ['a.csv', 'b.csv', 'c.csv']
+    for fname in filenames:
+        with open(os.path.join(csv_dir, fname), 'w+') as fd:
+            fd.write('1,2,3\n')
+    time.sleep(0.5)
+
+    # action
+    os.system(f'./sync_sd_to_remote {config_filename}')
+
+    # assert directories contain same files
+    local_path = os.path.join(syncroot, 'result')
+    os.makedirs(local_path)
+    os.system(f'rsync -rva flashair@localhost:{target_path}/ {local_path}/')
+    if not is_same(csv_dir, local_path):
+        import pdb; pdb.set_trace()
+        assert False, 'test failed'
+
+    #import pdb; pdb.set_trace()
+
+    # second assemble
+
+    # make sure none of the files is updated the second time around -
+    #  i.e. that syncing works
+    mtimes = [os.stat(os.path.join(local_path, fname)).st_mtime for fname in filenames]
+
+    # second action
+    os.system(f'./sync_sd_to_remote {config_filename}')
+
+    # second assert
+    os.system(f'rsync -rva flashair@localhost:{target_path}/ {local_path}/')
+    assert is_same(csv_dir, local_path)
+    new_mtimes = [os.stat(os.path.join(local_path, fname)).st_mtime for fname in filenames]
+    assert new_mtimes == mtimes
+
+
 def run_sdcardemul():
     os.system('killall sdcardemul.py')
+
     with TemporaryDirectory() as syncroot:
-        # setup
-        config_filename, target_path = create_config(syncroot)
-        source_dir = os.path.join(syncroot, 'sd')
-        csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
-        os.makedirs(csv_dir)
-        os.system(f'./sdcardemul.py --dir {source_dir} &')
-        for fname in ['a.csv', 'b.csv', 'c.csv']:
-            with open(os.path.join(csv_dir, fname), 'w+') as fd:
-                fd.write('1,2,3\n')
-        time.sleep(0.5)
-
-        # action
-        os.system(f'./sync_sd_to_remote {config_filename}')
-
-        # check directories contain same files
-        local_path = os.path.join(syncroot, 'result')
-        os.makedirs(local_path)
-        os.system(f'rsync -rva flashair@localhost:{target_path}/ {local_path}/')
-        if not is_same(csv_dir, local_path):
-            import pdb; pdb.set_trace()
-            assert False, 'test failed'
-
+        run_sdcardemul_syncroot(syncroot)
 
 def main():
     run_sdcardemul()

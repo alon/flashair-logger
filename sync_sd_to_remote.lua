@@ -47,6 +47,7 @@ function sync(filename, contents)
     return fa_pipe.pipe_simple(contents, cmd)
 end
 
+
 function module.main()
     -- Load config file
     if arg[1] then
@@ -72,19 +73,15 @@ function module.main()
     os.execute('mkdir -p ' .. SYNC_DIR)
 	files = flashair.dir_read("/CSVFILES/LOG")
 
-    local syncer = fa_sync.Syncer(SYNC_DIR)
+    local syncer = fa_sync.Syncer(SSH_OPTS, SSH_USER, SSH_HOST, TARGET_PATH)
 
     local k
     local v
-	for k, v in ipairs(files) do
-		if not syncer:synced(v.filename, v.date, v.time) then
-            print("syncing " .. v.filename .. ' (' .. v.size .. ')')
-			file_body = flashair.csvfile_get(v.filename)
-            if sync(v.filename, file_body) ~= 0 then
-                print("ERROR syncing " .. v.filename .. ", skipping it (not updating sync file)")
-            else
-                syncer:update(v.filename, v.date, v.time)
-            end
+	for k, filename in syncer:need_updating(files) do
+        DEBUGP(function () return string.format('reading %s', filename) end)
+        file_body = flashair.csvfile_get(filename)
+        if sync(filename, file_body) ~= 0 then
+            print("ERROR syncing " .. v.filename .. ", skipping it (not updating sync file)")
         end
 	end
 	print("ended sync")
