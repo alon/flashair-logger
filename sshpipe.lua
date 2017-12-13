@@ -1,4 +1,5 @@
 local posix = require('posix')
+local iowrap = require('iowrap')
 
 local module = {}
 
@@ -37,15 +38,24 @@ function module.pipe_simple(input, cmd, get_output)
     local pid = background_write(IN_FIFO, input)
     local full_cmd
     if get_output then
-        full_cmd = string.format('%s < %s > %s', cmd, IN_FIFO, OUT_FIFO)
+        full_cmd = string.format('%s < %s > %s &', cmd, IN_FIFO, OUT_FIFO)
     else
         full_cmd = string.format('%s < %s', cmd, IN_FIFO)
     end
     DEBUGP(function () return string.format("cmd = %s, get_output = %s", full_cmd, get_output) end)
+    local ret
     local success, reason, status = os.execute(full_cmd)
+    if get_output then
+        local f = iowrap.open(OUT_FIFO)
+        ret = f:read()
+        DEBUGP(function () return string.format("read %s bytes", #ret) end)
+    end
     DEBUGP(function () return string.format("pid = %s", pid) end)
     posix.wait(pid)
     DEBUGP(function () return string.format("status = %s; success = %s; reason = %s", status, success, reason) end)
+    if get_output then
+        return ret
+    end
     if success == 0 then
         return 0
     else
