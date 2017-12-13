@@ -22,6 +22,8 @@ local posix = require("posix")
 local os = require('oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
 local io = require('iowrap')
 local fa_sync = require('fa_sync')
+local sshpipe = require('sshpipe')
+local fa_debug = require('fa_debug')
 
 local module = {}
 
@@ -33,42 +35,10 @@ SYNC_DIR = "/tmp/sync"
 SSH_OPTS = ""
 SSH_USER = 'flashair'
 SSH_HOST = 'localhost'
-FIFO = "/tmp/fifo"
 DEBUG = false
 
 -- http (socket.http) produces "Malformed request" errors with the sd httpd server,
 -- so just use socket directly.
-
--- We open a fifo so we must background it or be blocked.
-function background_write(filename, text)
-    local pid, err = posix.fork()
-    assert(pid ~= nil, "fork() failed")
-    if pid == 0 then
-        local f = io.open(filename, "w")
-        f:write(text)
-        f:close()
-        posix._exit(0)
-        return
-    end
-    return pid
-end
-
--- Note: previous version used popen3, avoiding the need for the fifo. But the
--- openwrt's luaposix package doesn't support popen and dup2. This works just as well.
-function pipe_simple(input, cmd)
-    os.execute('[ ! -e ' .. FIFO .. ' ] && mkfifo ' .. FIFO)
-    local pid = background_write(FIFO, input)
-    local success, reason, status = os.execute(cmd .. ' < ' .. FIFO)
-    DEBUGP(function () return string.format("pid = %s", pid) end)
-    posix.wait(pid)
-    DEBUGP(function () return string.format("status = %s; success = %s; reason = %s", status, success, reason) end)
-    if success == 0 then
-        return 0
-    else
-        return status
-    end
-end
-
 
 -- Compatibility: Lua-5.1
 function split(str, pat)
@@ -202,7 +172,7 @@ end
 function sync(filename, contents)
     local cmd = 'ssh ' .. SSH_OPTS .. ' -l ' .. SSH_USER .. ' ' .. SSH_HOST .. ' "cat > ' .. TARGET_PATH .. '/' .. filename .. '"'
     DEBUGP(function () return cmd end)
-    return pipe_simple(contents, cmd)
+    return sshpipe.pipe_simple(contents, cmd)
 end
 
 function module.main()
@@ -212,9 +182,9 @@ function module.main()
     end
 
     if DEBUG then
-        _G.DEBUGP = function (f) print(string.format('DEBUG: %s', f())) end
+        fa_debug.set_debug()
     else
-        _G.DEBUGP = function (f) end -- do nothing
+        fa_debug.set_no_debug()
     end
     print("Welcome to sync sd to remote")
     print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
