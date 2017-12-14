@@ -49,6 +49,7 @@ function module.Syncer(ssh_opts, ssh_user, ssh_host, target_dir)
             input,
             string.format('ssh %s -l %s %s python3', self.ssh_opts, self.ssh_user, self.ssh_host),
             true)
+        -- TODO - check for error (output nil)
         return ipairs(output:split(','))
     end
 

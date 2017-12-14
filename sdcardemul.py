@@ -155,5 +155,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     BASE_DIR = os.path.join(os.getcwd(), args.dir)
     AirHTTPRequestHandler.flashair_version = args.version
+    print(f"FlashAir card Emulator - Serving from {args.dir}")
+    print(f"Emulating version {args.version}")
     os.chdir(BASE_DIR)
     main()
