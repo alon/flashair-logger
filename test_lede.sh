@@ -47,7 +47,7 @@ function C2 {
 
 trap killjobs EXIT
 
-IMAGE=./lede.kernel
+IMAGE=$(pwd)/lede.kernel
 
 if [ ! -e "$IMAGE" ]; then
     echo "Missing LEDE image required for test"
