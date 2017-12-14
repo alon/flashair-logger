@@ -21,9 +21,12 @@ before_script:
 
 script:
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
-  - sudo cp $HOME/.ssh/id_rsa $HOME/.ssh/authorized_keys
-  - sudo chmod 700 $HOME/.ssh
-  - sudo chmod 600 $HOME/.ssh/authorized_keys
+  - cp $HOME/.ssh/id_rsa $HOME/.ssh/authorized_keys
+  - chmod 700 $HOME/.ssh
+  - chmod 600 $HOME/.ssh/authorized_keys
+  - echo 'Host *' > $HOME/.ssh/config
+  - echo 'StrictHostKeyChecking off' >> $HOME/.ssh/config
+  - chmod 600 $HOME/.ssh/config
   - python3 --version
   - ln -sf $HOME/images/lede.kernel .
   - ./test.py --ssh-user $USER

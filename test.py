@@ -15,8 +15,8 @@ def cleanup():
 atexit.register(cleanup)
 
 
-def as_flashair(cmd):
-    ret = check_output(['ssh', '-q', '-o', 'StrictHostKeyChecking=no', 'flashair@localhost', cmd])
+def as_flashair(ssh_user, cmd):
+    ret = check_output(['ssh', '-q', '-o', 'StrictHostKeyChecking=no', ssh_user + '@localhost', cmd])
     return ret
 
 
@@ -39,8 +39,8 @@ def create_config(root_dir, debug, ssh_user):
     TARGET_PATH = '/home/flashair/test'
     SYNC_DIR = os.path.join(root_dir, 'sync_dir')
     DEBUG='true' if debug else 'false'
-    as_flashair('rm -Rf {TARGET_PATH}'.format(**locals()))
-    as_flashair('mkdir -p {TARGET_PATH}'.format(**locals()))
+    as_flashair(ssh_user, 'rm -Rf {TARGET_PATH}'.format(**locals()))
+    as_flashair(ssh_user, 'mkdir -p {TARGET_PATH}'.format(**locals()))
     with open(filename, 'w+') as fd:
         fd.write(config_template.format(**locals()))
     return filename, TARGET_PATH
@@ -86,7 +86,7 @@ def run_sdcardemul_syncroot(syncroot, ssh_user):
     # assert directories contain same files
     local_path = os.path.join(syncroot, 'result')
     os.makedirs(local_path)
-    os.system('rsync -rva flashair@localhost:{target_path}/ {local_path}/'.format(**locals()))
+    os.system('rsync -rva {ssh_user}@localhost:{target_path}/ {local_path}/'.format(**locals()))
     if not is_same(csv_dir, local_path):
         import pdb; pdb.set_trace()
         assert False, 'test failed'
@@ -104,7 +104,7 @@ def run_sdcardemul_syncroot(syncroot, ssh_user):
     os.system('./sync_sd_to_remote {config_filename}'.format(**locals()))
 
     # second assert
-    os.system('rsync -rva flashair@localhost:{target_path}/ {local_path}/'.format(**locals()))
+    os.system('rsync -rva {ssh_user}@localhost:{target_path}/ {local_path}/'.format(**locals()))
     assert is_same(csv_dir, local_path)
     new_mtimes = [os.stat(os.path.join(local_path, fname)).st_mtime for fname in filenames]
     assert new_mtimes == mtimes
