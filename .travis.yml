@@ -1,7 +1,7 @@
 dist: trusty
 language: python
 python:
-  - "3.6"
+  - "2.7"
 
 sudo: required
 
@@ -11,20 +11,13 @@ cache:
         - $HOME/images
 
 before_script:
-    # python must be python2, so make sure in this hacky way
     - python2 --version
-    - export PYTHON_ORIG=$(which python)
-    - export PYTHON2=$(which python2)
-    - export PYTHON_ORIG_BACKUP=${PYTHON_ORIG}.orig
-    - sudo mv $PYTHON_ORIG $PYTHON_ORIG_BACKUP
-    - sudo ln -sf $PYTHON2 $PYTHON_ORIG
+    - python3 --version
     - python --version
     - QEMU_ARCHES="arm" bash -e ci/travis-qemu.sh
     - export PATH=$PATH:$HOME/qemu/bin
     - mkdir -p $HOME/images
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -o $HOME/images/lede.kernel
-    - rm $PYTHON_ORIG
-    - mv $PYTHON_ORIG_BACKUP $PYTHON_ORIG
 
 script:
   - python3 --version
