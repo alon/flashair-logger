@@ -16,8 +16,8 @@ before_script:
     - export PYTHON_ORIG=$(which python)
     - export PYTHON2=$(which python2)
     - export PYTHON_ORIG_BACKUP=${PYTHON_ORIG}.orig
-    - mv $PYTHON_ORIG $PYTHON_ORIG_BACKUP
-    - ln -sf $PYTHON2 $PYTHON_ORIG
+    - sudo mv $PYTHON_ORIG $PYTHON_ORIG_BACKUP
+    - sudo ln -sf $PYTHON2 $PYTHON_ORIG
     - python --version
     - QEMU_ARCHES="arm" bash -e ci/travis-qemu.sh
     - export PATH=$PATH:$HOME/qemu/bin
