@@ -1,3 +1,5 @@
+# travis-qemu [![Build Status](https://travis-ci.org/alon/flashair-openwrt-logger.svg?branch=master)](https://travis-ci.org/alon/flashair-openwrt-logger)
+
 Logging of the contents of an air SD card via an ssh connection.
 
 Logger makes the following assumptions:
