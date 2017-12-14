@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ "$UID" != "0" ]; then
-    exec sudo "$0" "$1"
+    exec sudo "$0" "$@"
 fi
 
 IMAGE=$1

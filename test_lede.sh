@@ -56,9 +56,9 @@ if [ ! -e "$IMAGE" ]; then
     exit -1
 fi
 
-tmux kill-session -t $SESSION
-tmux new-session -d -s $SESSION
-tmux new-window -t $SESSION -n qemu ./start_qemu_armvirt.sh $IMAGE
+# TODO - very heavy handed, fit for container/vm like travis
+sudo killall qemu-system-arm
+sudo daemonize "$(pwd)/start_qemu_armvirt.sh" $IMAGE
 
 echo waiting for ssh on qemu
 waitfortcp 192.168.1.1 22
