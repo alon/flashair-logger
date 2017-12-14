@@ -20,8 +20,8 @@ before_script:
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -o $HOME/images/lede.kernel
 
 script:
-  - ssh --version
-  - tmux --version
+  - ssh -V
+  - tmux -V
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
   - cp $HOME/.ssh/id_rsa $HOME/.ssh/authorized_keys
   - chmod 700 $HOME/.ssh
