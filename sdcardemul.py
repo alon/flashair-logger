@@ -11,8 +11,9 @@ from http import HTTPStatus
 
 Acronyms used:
 FAv3 - FlashAir v3 by Toshiba. The only supported hardware (used to support v2,
-need to check if v2 supports the command.cgi API. Downloading files is the same,
-i.e.
+need to check if v2 supports the command.cgi API.
+
+Downloading files is the same, i.e.
 
 http://192.168.0.1/<full_path>
 
@@ -53,26 +54,39 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
             return self.handle_command_cgi()
         return super().do_GET()
 
-
     def handle_command_cgi(self):
         # TODO - use the standard library for this
         qsplit = self.path.split('?')
         if len(qsplit) == 1:
-            return self.send_error(HTTPStatus.BAD_REQUEST, 'Bad command.cgi invocation (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Bad command.cgi invocation (not FAv3 compat)')
         params = [x.split('=') for x in qsplit[1].split('&')]
         if not all(len(p) == 2 for p in params):
-            return self.send_error(HTTPStatus.BAD_REQUEST, 'Bad command.cgi parameters (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Bad command.cgi parameters (not FAv3 compat)')
         d = dict(params)
         if 'op' not in d:
-            return self.send_error(HTTPStatus.BAD_REQUEST, 'Bad command.cgi call: missing op (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Bad command.cgi call: missing op (not FAv3 compat)')
         op_str = d['op']
         op = try_parse_int(d['op'], op_str)
         if not isinstance(op, int):
-            return self.send_error(HTTPStatus.BAD_REQUEST, 'Bad command.cgi call: op is not an integer (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Bad command.cgi call: op is not an integer (not FAv3 compat)')
         if op != 100:
-            return self.send_error(HTTPStatus.BAD_REQUEST, f'Unsupported command.cgi op: {op} (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Unsupported command.cgi op: {op} (not FAv3 compat)'
+                .format(**locals()))
         if 'DIR' not in d:
-            return self.send_error(HTTPStatus.BAD_REQUEST, f'Bad 100 command: missing DIR (not FAv3 compat)')
+            return self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                'Bad 100 command: missing DIR (not FAv3 compat)'
+                .format(**locals()))
         DIR = d['DIR']
         while DIR[:1] == '/':
             DIR = DIR[1:]
@@ -85,7 +99,9 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
             filename, size, date, time = (
                 item['filename'], item['size'], item['date'], item['time']
             )
-            f.write(f'{DIR},{filename},{size},32,{date},{time}\n'.encode())
+            f.write('{DIR},{filename},{size},32,{date},{time}\n'
+                    .format(**locals())
+                    .encode())
         f.seek(0)
         self.send_response(HTTPStatus.OK)
         self.send_header('Connection', 'close')
@@ -98,7 +114,8 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
         try:
             lst = os.listdir(path)
         except os.error:
-            return (None, HTTPStatus.BAD_REQUEST, "No permission to list directory")
+            return (None, HTTPStatus.BAD_REQUEST,
+                    "No permission to list directory")
         lst.sort(key=lambda a: a.lower())
         ret = []
         for filename in lst:
@@ -106,7 +123,8 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
             size = stat.st_size
             mtime = int(stat.st_mtime)
             date, time = mtime >> 16, mtime & 0xffff
-            ret.append(dict(filename=filename, size=size, date=date, time=time))
+            ret.append(dict(
+                filename=filename, size=size, date=date, time=time))
         return ret, None, ''
 
 
@@ -126,9 +144,9 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
                 item['filename'], item['size'], item['date'], item['time']
             )
             if self.flashair_version == 2:
-                s = f'wlansd[{i}]="{path},{filename},{size},32,{date},{time}";\n'
+                s = 'wlansd[{i}]="{path},{filename},{size},32,{date},{time}";\n'.format(**locals())
             else:
-                s = f'wlansd.push({{"r_uri":"{path}", "fname":"{filename}", "fsize":{size},"attr":32,"fdate":{date},"ftime":{time}}}'
+                s = 'wlansd.push({{"r_uri":"{path}", "fname":"{filename}", "fsize":{size},"attr":32,"fdate":{date},"ftime":{time}}}'.format(**locals())
             f.write(s.encode())
         return self.bytesio_response(HTTPStatus.OK, f)
 
@@ -143,19 +161,20 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
         return f
 
 
-def main(HandlerClass = AirHTTPRequestHandler,
-         ServerClass = HTTPServer):
+def main(HandlerClass=AirHTTPRequestHandler,
+         ServerClass=HTTPServer):
     test(HandlerClass=HandlerClass, ServerClass=ServerClass)
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--version', default=3, type=int, choices=[2,3])
+    parser.add_argument('--version', default=3, type=int, choices=[2, 3])
     parser.add_argument('--dir', default='test-dir')
     args = parser.parse_args()
     BASE_DIR = os.path.join(os.getcwd(), args.dir)
     AirHTTPRequestHandler.flashair_version = args.version
-    print(f"FlashAir card Emulator - Serving from {args.dir}")
-    print(f"Emulating version {args.version}")
+    print("FlashAir card Emulator - Serving from {args.dir}"
+          .format(**locals()))
+    print("Emulating version {args.version}".format(**locals()))
     os.chdir(BASE_DIR)
     main()

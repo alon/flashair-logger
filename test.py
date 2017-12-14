@@ -39,11 +39,16 @@ def create_config(root_dir, debug):
     TARGET_PATH = '/home/flashair/test'
     SYNC_DIR = os.path.join(root_dir, 'sync_dir')
     DEBUG='true' if debug else 'false'
-    as_flashair(f'rm -Rf {TARGET_PATH}')
-    as_flashair(f'mkdir -p {TARGET_PATH}')
+    as_flashair('rm -Rf {TARGET_PATH}'.format(**locals()))
+    as_flashair('mkdir -p {TARGET_PATH}'.format(**locals()))
     with open(filename, 'w+') as fd:
         fd.write(config_template.format(**locals()))
     return filename, TARGET_PATH
+
+
+def banner(txt):
+    print(txt)
+    print('=' * len(txt))
 
 
 def is_same(base1, base2):
@@ -68,7 +73,7 @@ def run_sdcardemul_syncroot(syncroot):
     source_dir = os.path.join(syncroot, 'sd')
     csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
     os.makedirs(csv_dir)
-    os.system(f'./sdcardemul.py --dir {source_dir} &')
+    os.system('./sdcardemul.py --dir {source_dir} &'.format(**locals()))
     filenames = ['a.csv', 'b.csv', 'c.csv']
     for fname in filenames:
         with open(os.path.join(csv_dir, fname), 'w+') as fd:
@@ -76,12 +81,12 @@ def run_sdcardemul_syncroot(syncroot):
     time.sleep(0.5)
 
     # action
-    os.system(f'./sync_sd_to_remote {config_filename}')
+    os.system('./sync_sd_to_remote {config_filename}'.format(**locals()))
 
     # assert directories contain same files
     local_path = os.path.join(syncroot, 'result')
     os.makedirs(local_path)
-    os.system(f'rsync -rva flashair@localhost:{target_path}/ {local_path}/')
+    os.system('rsync -rva flashair@localhost:{target_path}/ {local_path}/'.format(**locals()))
     if not is_same(csv_dir, local_path):
         import pdb; pdb.set_trace()
         assert False, 'test failed'
@@ -89,16 +94,17 @@ def run_sdcardemul_syncroot(syncroot):
     #import pdb; pdb.set_trace()
 
     # second assemble
+    banner("SECOND TEST: No mtime change after second sync where SD didn't change")
 
     # make sure none of the files is updated the second time around -
     #  i.e. that syncing works
     mtimes = [os.stat(os.path.join(local_path, fname)).st_mtime for fname in filenames]
 
     # second action
-    os.system(f'./sync_sd_to_remote {config_filename}')
+    os.system('./sync_sd_to_remote {config_filename}'.format(**locals()))
 
     # second assert
-    os.system(f'rsync -rva flashair@localhost:{target_path}/ {local_path}/')
+    os.system('rsync -rva flashair@localhost:{target_path}/ {local_path}/'.format(**locals()))
     assert is_same(csv_dir, local_path)
     new_mtimes = [os.stat(os.path.join(local_path, fname)).st_mtime for fname in filenames]
     assert new_mtimes == mtimes
