@@ -58,7 +58,7 @@ fi
 
 # TODO - very heavy handed, fit for container/vm like travis
 sudo killall qemu-system-arm
-sudo daemonize "$(pwd)/start_qemu_armvirt.sh" $IMAGE
+sudo "$(pwd)/start_qemu_armvirt.sh" $IMAGE > /dev/null < /dev/null &
 
 echo waiting for ssh on qemu
 waitfortcp 192.168.1.1 22

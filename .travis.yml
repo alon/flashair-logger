@@ -20,9 +20,8 @@ before_script:
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -o $HOME/images/lede.kernel
 
 script:
-  - sudo apt-get install strace daemonize -y
+  - sudo apt-get install strace -y
   - ssh -V
-  - ssh -q -o StrictHostKeyChecking=no $USER@localhost echo ok
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
   - cp $HOME/.ssh/id_rsa $HOME/.ssh/authorized_keys
   - chmod 700 $HOME/.ssh
@@ -30,6 +29,7 @@ script:
   - echo 'Host *' > $HOME/.ssh/config
   - echo 'StrictHostKeyChecking off' >> $HOME/.ssh/config
   - chmod 600 $HOME/.ssh/config
+  - ssh -q -o StrictHostKeyChecking=no $USER@localhost echo ok
   - python3 --version
   - ln -sf $HOME/images/lede.kernel .
   - ./test.py --ssh-user $USER
