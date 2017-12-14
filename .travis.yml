@@ -20,6 +20,9 @@ before_script:
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -o $HOME/images/lede.kernel
 
 script:
+  - export PATH=$PATH:$HOME/qemu/bin
+  - sudo ln -sf $HOME/qemu/bin/qemu-system-arm /usr/bin
+  - qemu-system-arm --version
   - sudo apt-get install strace -y
   - ssh -V
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
