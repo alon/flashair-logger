@@ -11,7 +11,8 @@ cache:
 
 before_script:
     # python must be python2, so make sure in this hacky way
-    - apt list-selections
+    - python2 --version
+    - dpkg --get-selections
     - apt install python2
     - export PYTHON_ORIG=`which python`
     - mv $PYTHON_ORIG ${PYTHON_ORIG}.orig
