@@ -33,7 +33,7 @@ function waitfortcp {
 
 function killjobs {
     for p in $(jobs -p); do
-        kill "$p"
+        sudo kill "$p"
     done
 }
 
