@@ -20,6 +20,12 @@ before_script:
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -o $HOME/images/lede.kernel
 
 script:
+  - sudo useradd flashair
+  - ssh-keygen -t rsa -P ''
+  - sudo cp $HOME/.ssh/id_rsa /home/flashair/.ssh/authorized_keys
+  - sudo chown flashair:flashair /home/flashair/.ssh/authorized_keys
+  - sudo chmod 700 /home/flashair/.ssh
+  - sudo chmod 600 /home/flashair/.ssh/authorized_keys
   - python3 --version
   - ln -sf $HOME/images/lede.kernel .
   - ./test.py

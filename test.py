@@ -16,7 +16,7 @@ atexit.register(cleanup)
 
 
 def as_flashair(cmd):
-    ret = check_output(['ssh', 'flashair@localhost', cmd])
+    ret = check_output(['ssh', '-q', '-o', 'StrictHostKeyChecking=no', 'flashair@localhost', cmd])
     return ret
 
 
