@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+from argparse import ArgumentParser
 import os
 from subprocess import check_output
 import atexit
-import shutil
 from tempfile import TemporaryDirectory
 import time
 
@@ -30,11 +30,11 @@ DEBUG={DEBUG}
 """
 
 
-def create_config(root_dir, debug):
+def create_config(root_dir, debug, ssh_user):
     filename = os.path.join(root_dir, 'config.lua')
     SDCARD_HOST = 'localhost'
     SDCARD_PORT = 8000
-    SSH_USER = 'flashair'
+    SSH_USER = ssh_user
     SSH_HOST = '127.0.0.1'
     TARGET_PATH = '/home/flashair/test'
     SYNC_DIR = os.path.join(root_dir, 'sync_dir')
@@ -67,9 +67,9 @@ def is_same(base1, base2):
     return True
 
 
-def run_sdcardemul_syncroot(syncroot):
+def run_sdcardemul_syncroot(syncroot, ssh_user):
     # assemble
-    config_filename, target_path = create_config(syncroot, debug=False)
+    config_filename, target_path = create_config(syncroot, debug=False, ssh_user=ssh_user)
     source_dir = os.path.join(syncroot, 'sd')
     csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
     os.makedirs(csv_dir)
@@ -110,14 +110,17 @@ def run_sdcardemul_syncroot(syncroot):
     assert new_mtimes == mtimes
 
 
-def run_sdcardemul():
+def run_sdcardemul(ssh_user):
     os.system('killall sdcardemul.py')
 
     with TemporaryDirectory() as syncroot:
-        run_sdcardemul_syncroot(syncroot)
+        run_sdcardemul_syncroot(syncroot, ssh_user)
 
 def main():
-    run_sdcardemul()
+    parser = ArgumentParser()
+    parser.add_argument('--ssh-user', default='flashair')
+    args = parser.parse_args()
+    run_sdcardemul(ssh_user=args.ssh_user)
 
 
 if __name__ == '__main__':

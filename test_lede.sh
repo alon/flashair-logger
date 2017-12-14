@@ -14,6 +14,12 @@
 
 SESSION=flashair_test
 
+SSH_USER=flashair
+if [ "x$1" != "x" ]; then
+    SSH_USER=$1
+fi
+TARGET_PATH=/home/$SSH_USER/data-logger
+
 function waitfortcp {
     HOST=$1
     PORT=$2
@@ -62,6 +68,9 @@ waitfortcp 192.168.1.1 22
 S ash < lede.setup_network.sh
 S opkg update
 S opkg install luaposix luasocket
+cp lede.config.test.template lede.config.test
+echo "SSH_USER='$SSH_USER'" >> lede.config.test
+echo "TARGET_PATH='$TARGET_PATH'" >> lede.config.test
 C2 lede.key sync_sd_to_remote lede.config.test sync_sd_to_remote.lua fa_*.lua oswrap.lua iowrap.lua
 # one time: add lede.key.pub to authorized keys of the target ssh account
 SDROOT=/tmp/flashair_lede_test_root/
@@ -73,8 +82,7 @@ for f in a.csv b.csv c.csv; do
 done
 
 # clean directory first (note: this must sync with lede.config.test)
-TARGETPATH=/home/flashair/data-logger
-ssh flashair@localhost rm -R $TARGETPATH \; mkdir -p $TARGETPATH
+ssh flashair@localhost rm -R "$TARGET_PATH" \; mkdir -p "$TARGET_PATH"
 
 # Start Flashair card simulator
 ./sdcardemul.py --dir $SDROOT &
@@ -88,7 +96,7 @@ LOCALPATH=/tmp/flashair_test_output
 rm -Rf $LOCALPATH
 
 echo "rsync from target locally for comparison"
-rsync -ra flashair@localhost:$TARGETPATH/ $LOCALPATH/
+rsync -ra "flashair@localhost:$TARGET_PATH/" "$LOCALPATH/"
 
 echo "comparing"
 python3 -c "import test, os; os._exit(int(not test.is_same('$CSVROOT', '$LOCALPATH')))"
