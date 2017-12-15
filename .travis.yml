@@ -27,7 +27,7 @@ script:
   - sudo apt-get install strace -y
   - ssh -V
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
-  - cp $HOME/.ssh/id_rsa $HOME/.ssh/authorized_keys
+  - cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
   - chmod 700 $HOME/.ssh
   - chmod 600 $HOME/.ssh/authorized_keys
   - echo 'Host *' > $HOME/.ssh/config
