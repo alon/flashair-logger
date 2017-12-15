@@ -69,9 +69,12 @@ echo "========== host ========="
 ping -c 2 64.6.64.6
 route -n
 cat /etc/resolv.conf
+ifconfig -a
 echo "========== vm ==========="
 S ping -c 2 64.6.64.6
 S route -n
+S ping -c 2 10.20.0.1
+ifconfig -a
 echo "========================="
 S opkg update
 S opkg install luaposix luasocket
