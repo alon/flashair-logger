@@ -1,4 +1,3 @@
-local module = {}
 local fa_pipe = require('fa_pipe')
 
 
@@ -11,7 +10,7 @@ function string:split(sep)
 end
 
 
-function module.Syncer(ssh_opts, ssh_user, ssh_host, target_dir)
+function Syncer(ssh_opts, ssh_user, ssh_host, target_dir)
     local syncer = {
         ssh_opts=ssh_opts,
         ssh_user=ssh_user,
@@ -57,4 +56,4 @@ function module.Syncer(ssh_opts, ssh_user, ssh_host, target_dir)
 end
 
 
-return module
+return {Syncer=Syncer}
