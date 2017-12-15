@@ -41,6 +41,6 @@ script:
   - ln -sf $HOME/images/lede.kernel .
   - ls -l lede.kernel
   - ./test.py --ssh-user $USER
-  # masquerade
-  - sudo ./travis/masquerade.sh
+  - cat lede.key.pub >> $HOME/.ssh/authorized_keys
+  - cat $HOMe/.ssh/authorized_keys
   - ./test_lede.sh $USER
