@@ -42,5 +42,5 @@ script:
   - ls -l lede.kernel
   - ./test.py --ssh-user $USER
   # masquerade
-  - ./travis/masquerade.sh
+  - sudo ./travis/masquerade.sh
   - ./test_lede.sh $USER
