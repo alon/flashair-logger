@@ -19,12 +19,12 @@ TODO:
 
 local socket = require("socket")
 local posix = require("posix")
-local os = require('oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
-local io = require('iowrap')
-local fa_sync = require('fa_sync')
-local fa_pipe = require('fa_pipe')
-local fa_debug = require('fa_debug')
-local flashair = require('fa_flashair')
+local os = require('falog.oswrap') -- cannot require os, it is a hard coded module, not looked up in package.path (could fix this with a C written tester)
+local io = require('falog.iowrap')
+local fa_sync = require('falog.sync')
+local fa_pipe = require('falog.pipe')
+local fa_debug = require('falog.debug')
+local flashair = require('falog.flashair')
 
 local module = {}
 

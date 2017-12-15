@@ -1,4 +1,4 @@
-local fa_pipe = require('fa_pipe')
+local fa_pipe = require('falog.pipe')
 
 
 function string:split(sep)

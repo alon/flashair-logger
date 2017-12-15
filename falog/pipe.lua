@@ -1,5 +1,5 @@
 local posix = require('posix')
-local iowrap = require('iowrap')
+local iowrap = require('falog.iowrap')
 
 local module = {}
 
