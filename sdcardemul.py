@@ -5,7 +5,10 @@ import os
 import sys
 from io import BytesIO
 from http.server import HTTPServer, SimpleHTTPRequestHandler, test
-from http import HTTPStatus
+# from http import HTTPStatus # 3.5 feature, but travis uses 3.4 by default
+# (debian/ubuntu 14.04 limit)
+
+OK, BAD_REQUEST = 200, 400
 
 """
 
@@ -59,32 +62,32 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
         qsplit = self.path.split('?')
         if len(qsplit) == 1:
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Bad command.cgi invocation (not FAv3 compat)')
         params = [x.split('=') for x in qsplit[1].split('&')]
         if not all(len(p) == 2 for p in params):
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Bad command.cgi parameters (not FAv3 compat)')
         d = dict(params)
         if 'op' not in d:
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Bad command.cgi call: missing op (not FAv3 compat)')
         op_str = d['op']
         op = try_parse_int(d['op'], op_str)
         if not isinstance(op, int):
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Bad command.cgi call: op is not an integer (not FAv3 compat)')
         if op != 100:
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Unsupported command.cgi op: {op} (not FAv3 compat)'
                 .format(**locals()))
         if 'DIR' not in d:
             return self.send_error(
-                HTTPStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 'Bad 100 command: missing DIR (not FAv3 compat)'
                 .format(**locals()))
         DIR = d['DIR']
@@ -103,7 +106,7 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
                     .format(**locals())
                     .encode())
         f.seek(0)
-        self.send_response(HTTPStatus.OK)
+        self.send_response(OK)
         self.send_header('Connection', 'close')
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
@@ -114,7 +117,7 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
         try:
             lst = os.listdir(path)
         except os.error:
-            return (None, HTTPStatus.BAD_REQUEST,
+            return (None, BAD_REQUEST,
                     "No permission to list directory")
         lst.sort(key=lambda a: a.lower())
         ret = []
@@ -148,7 +151,7 @@ class AirHTTPRequestHandler(SimpleHTTPRequestHandler):
             else:
                 s = 'wlansd.push({{"r_uri":"{path}", "fname":"{filename}", "fsize":{size},"attr":32,"fdate":{date},"ftime":{time}}}'.format(**locals())
             f.write(s.encode())
-        return self.bytesio_response(HTTPStatus.OK, f)
+        return self.bytesio_response(OK, f)
 
 
     def bytesio_response(self, http_code, f):

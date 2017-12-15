@@ -87,9 +87,7 @@ def run_sdcardemul_syncroot(syncroot, ssh_user):
     local_path = os.path.join(syncroot, 'result')
     os.makedirs(local_path)
     os.system('rsync -rva {ssh_user}@localhost:{target_path}/ {local_path}/'.format(**locals()))
-    if not is_same(csv_dir, local_path):
-        import pdb; pdb.set_trace()
-        assert False, 'test failed'
+    assert is_same(csv_dir, local_path)
 
     #import pdb; pdb.set_trace()
 
