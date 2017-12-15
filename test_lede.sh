@@ -65,13 +65,14 @@ time waitfortcp 192.168.1.1 22
 # luaposix & luasocket are installed by default on LEDE 17+
 S ash < lede.setup_network.sh
 S "cat > /etc/resolv.conf" < /etc/resolv.conf
-echo "host"
-ping -c 4 64.6.64.6
+echo "========== host ========="
+ping -c 2 64.6.64.6
 route -n
 cat /etc/resolv.conf
-echo "vm"
-S ping -c 4 64.6.64.6
+echo "========== vm ==========="
+S ping -c 2 64.6.64.6
 S route -n
+echo "========================="
 S opkg update
 S opkg install luaposix luasocket
 cp lede.config.test.template lede.config.test
