@@ -18,11 +18,10 @@ before_script:
     - export PATH=$PATH:$HOME/qemu/bin
     - mkdir -p $HOME/images
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -O $HOME/images/lede.kernel
-    - sudo apt-get install lua5.1
-    - sudo apt-get install lua-socket lua-posix
+    - sudo apt-get install lua5.1 lua-socket lua-posix -y
 
 script:
-  - lua --version
+  - lua -v
   - ssh -V
   - qemu-system-arm --version
   - python3 --version
