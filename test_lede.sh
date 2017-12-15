@@ -71,10 +71,11 @@ route -n
 cat /etc/resolv.conf
 ifconfig -a
 echo "========== vm ==========="
+S ping -c 2 192.168.1.101
+S ping -c 2 10.20.0.1
 S ping -c 2 64.6.64.6
 S route -n
-S ping -c 2 10.20.0.1
-ifconfig -a
+S ifconfig -a
 echo "========================="
 S opkg update
 S opkg install luaposix luasocket
