@@ -64,12 +64,14 @@ time waitfortcp 192.168.1.1 22
 # Provision LEDE - Install syncer
 # luaposix & luasocket are installed by default on LEDE 17+
 S ash < lede.setup_network.sh
+S "cat > /etc/resolv.conf" < /etc/resolv.conf
+echo "host"
 ping -c 4 64.6.64.6
-S ping -c 4 64.6.64.6
 route -n
-S route -n
 cat /etc/resolv.conf
-S cat /etc/resolv.conf
+echo "vm"
+S ping -c 4 64.6.64.6
+S route -n
 S opkg update
 S opkg install luaposix luasocket
 cp lede.config.test.template lede.config.test
