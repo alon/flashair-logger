@@ -12,8 +12,6 @@
 # host: verify results
 # uses ssh to prebuilt host user (can run another system for that host, even another LEDE system)
 
-SESSION=flashair_test
-
 SSH_USER=flashair
 if [ "x$1" != "x" ]; then
     SSH_USER=$1
@@ -58,7 +56,7 @@ fi
 
 # TODO - very heavy handed, fit for container/vm like travis
 sudo killall qemu-system-arm
-sudo "$(pwd)/start_qemu_armvirt.sh" $IMAGE > /dev/null < /dev/null &
+sudo "$(pwd)/start_qemu_armvirt.sh" "$IMAGE" > /dev/null < /dev/null &
 
 echo waiting for ssh on qemu
 waitfortcp 192.168.1.1 22
@@ -82,7 +80,7 @@ for f in a.csv b.csv c.csv; do
 done
 
 # clean directory first (note: this must sync with lede.config.test)
-ssh flashair@localhost rm -R "$TARGET_PATH" \; mkdir -p "$TARGET_PATH"
+ssh "$SSH_USER@localhost" rm -R "$TARGET_PATH" \; mkdir -p "$TARGET_PATH"
 
 # Start Flashair card simulator
 ./sdcardemul.py --dir $SDROOT &
@@ -96,7 +94,7 @@ LOCALPATH=/tmp/flashair_test_output
 rm -Rf $LOCALPATH
 
 echo "rsync from target locally for comparison"
-rsync -ra "flashair@localhost:$TARGET_PATH/" "$LOCALPATH/"
+rsync -ra "$SSH_USER@localhost:$TARGET_PATH/" "$LOCALPATH/"
 
 echo "comparing"
 python3 -c "import test, os; os._exit(int(not test.is_same('$CSVROOT', '$LOCALPATH')))"
