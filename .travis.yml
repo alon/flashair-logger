@@ -32,6 +32,8 @@ script:
   - echo 'Host *' > $HOME/.ssh/config
   - echo 'StrictHostKeyChecking off' >> $HOME/.ssh/config
   - chmod 600 $HOME/.ssh/config
+  - ssh -o StrictHostKeyChecking=no $USER@localhost echo ok
+  - ssh $USER@localhost echo ok
   - ssh -q -o StrictHostKeyChecking=no $USER@localhost echo ok
   - python3 --version
   - ln -sf $HOME/images/lede.kernel .
