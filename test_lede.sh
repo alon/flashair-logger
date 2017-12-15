@@ -96,7 +96,7 @@ echo "TARGET_PATH='$TARGET_PATH'" >> lede.config.test
 C2 lede.key sync_sd_to_remote lede.config.test sync_sd_to_remote.lua fa_*.lua oswrap.lua iowrap.lua
 # one time: add lede.key.pub to authorized keys of the target ssh account
 SDROOT=/tmp/flashair_lede_test_root/
-rm -Rf $SDROOT
+[ -e $SDROOT ] && rm -Rf $SDROOT
 CSVROOT=$SDROOT/CSVFILES/LOG
 mkdir -p $CSVROOT
 for f in a.csv b.csv c.csv; do
@@ -115,7 +115,7 @@ S /root/sync_sd_to_remote /root/lede.config.test
 
 # verify it worked correctly
 LOCALPATH=/tmp/flashair_test_output
-rm -Rf $LOCALPATH
+[ -e $LOCALPATH ] && rm -Rf $LOCALPATH
 
 echo "rsync from target locally for comparison"
 rsync -ra "$SSH_USER@localhost:$TARGET_PATH/" "$LOCALPATH/"
