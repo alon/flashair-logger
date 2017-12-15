@@ -12,6 +12,10 @@
 # host: verify results
 # uses ssh to prebuilt host user (can run another system for that host, even another LEDE system)
 
+
+# TODO: could not set up vm connection to internet on Travis-CI. So going with local packages.
+CONNECT_TO_INTERNET=no
+
 SSH_USER=flashair
 if [ "x$1" != "x" ]; then
     SSH_USER=$1
@@ -61,24 +65,31 @@ sudo "$(pwd)/start_qemu_armvirt.sh" "$IMAGE" > /dev/null < /dev/null &
 echo "waiting for ssh on qemu"
 time waitfortcp 192.168.1.1 22
 
-# Provision LEDE - Install syncer
-# luaposix & luasocket are installed by default on LEDE 17+
-S ash < lede.setup_network.sh
-S "cat > /etc/resolv.conf" < /etc/resolv.conf
-echo "========== host ========="
-ping -c 2 64.6.64.6
-route -n
-cat /etc/resolv.conf
-ifconfig -a
-echo "========== vm ==========="
-S ping -c 2 192.168.1.101
-S ping -c 2 10.20.0.1
-S ping -c 2 64.6.64.6
-S route -n
-S ifconfig -a
-echo "========================="
-S opkg update
-S opkg install luaposix luasocket
+if [ "x$CONNECT_TO_INTERNET" != "xno" ]; then
+    # Connet to the external network
+    S ash < lede.setup_network.sh
+    S "cat > /etc/resolv.conf" < /etc/resolv.conf
+    echo "========== host ========="
+    ping -c 2 64.6.64.6
+    route -n
+    cat /etc/resolv.conf
+    ifconfig -a
+    echo "========== vm ==========="
+    S ping -c 2 192.168.1.101
+    S ping -c 2 64.6.64.6
+    S route -n
+    S ifconfig -a
+    echo "========================="
+    S opkg update
+    S opkg install luaposix luasocket
+else
+    wget http://downloads.lede-project.org/releases/17.01.0/targets/armvirt/generic/packages/librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
+    wget http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk
+    wget http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+    C2 librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+    S opkg install librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
+    S opkg install luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+fi
 cp lede.config.test.template lede.config.test
 echo "SSH_USER='$SSH_USER'" >> lede.config.test
 echo "TARGET_PATH='$TARGET_PATH'" >> lede.config.test
