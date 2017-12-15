@@ -1,5 +1,6 @@
-addons:
-    artifacts: true
+#addons:
+#    artifacts: true
+#    https://github.com/travis-ci/artifacts
 
 notifications:
     email:
@@ -19,16 +20,14 @@ cache:
         - $HOME/images
 
 before_script:
-    - python2 --version
-    - python3 --version
-    - python --version
-    - QEMU_ARCHES="arm" bash -e ci/travis-qemu.sh
-    - export PATH=$PATH:$HOME/qemu/bin
-    - mkdir -p $HOME/images
-    - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -O $HOME/images/lede.kernel
-    - sudo apt-get install lua5.1 lua-socket lua-posix -y
-
-script:
+  - python2 --version
+  - python3 --version
+  - python --version
+  - QEMU_ARCHES="arm" bash -e ci/travis-qemu.sh
+  - export PATH=$PATH:$HOME/qemu/bin
+  - mkdir -p $HOME/images
+  - [ ! -e $HOME/images/lede.kernel ] && wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -O $HOME/images/lede.kernel
+  - sudo apt-get install lua5.1 lua-socket lua-posix -y
   - lua -v
   - ssh -V
   - qemu-system-arm --version
@@ -37,7 +36,6 @@ script:
   - echo "$PATH"
   - ls -l $HOME/images/
   - sudo ln -sf $HOME/qemu/bin/qemu-system-arm /usr/bin
-  - sudo apt-get install strace -y
   - ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -P ''
   - cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
   - chmod 700 $HOME/.ssh
@@ -48,7 +46,9 @@ script:
   - ssh -o StrictHostKeyChecking=no "$USER@localhost" echo "ssh works ok"
   - ln -sf $HOME/images/lede.kernel .
   - ls -l lede.kernel
-  - ./test.py --ssh-user $USER
   - cat lede.key.pub >> $HOME/.ssh/authorized_keys
-  - cat $HOMe/.ssh/authorized_keys
+  - cat $HOME/.ssh/authorized_keys
+
+script:
+  - ./test.py --ssh-user $USER
   - ./test_lede.sh $USER
