@@ -19,8 +19,7 @@ before_script:
     - mkdir -p $HOME/images
     - wget "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs" -O $HOME/images/lede.kernel
     - sudo apt-get install lua5.1
-    - sudo apt-cache search lua
-    - sudo apt-get install luasocket luaposix
+    - sudo apt-get install lua-socket lua-posix
 
 script:
   - lua --version
