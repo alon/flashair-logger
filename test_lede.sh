@@ -44,7 +44,7 @@ function S {
 }
 
 function C2 {
-    scp -q -o StrictHostKeyChecking=no "$@" root@192.168.1.1:/root/
+    scp -r -q -o StrictHostKeyChecking=no "$@" root@192.168.1.1:/root/
 }
 
 trap killjobs EXIT
@@ -93,7 +93,7 @@ fi
 cp lede.config.test.template lede.config.test
 echo "SSH_USER='$SSH_USER'" >> lede.config.test
 echo "TARGET_PATH='$TARGET_PATH'" >> lede.config.test
-C2 lede.key sync_sd_to_remote lede.config.test sync_sd_to_remote.lua fa_*.lua oswrap.lua iowrap.lua
+C2 lede.key sync_sd_to_remote lede.config.test sync_sd_to_remote.lua falog
 # one time: add lede.key.pub to authorized keys of the target ssh account
 SDROOT=/tmp/flashair_lede_test_root/
 [ -e $SDROOT ] && rm -Rf $SDROOT
