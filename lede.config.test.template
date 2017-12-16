@@ -1,7 +1,6 @@
 -- lua config file for LEDE test
 SDCARD_HOST = "192.168.1.101"
 SDCARD_PORT = 8000
-SYNC_DIR = "/tmp/sync"
 -- -y avoids host validation, since this is the first connection
 SSH_OPTS = "-y -i /root/lede.key"
 SSH_HOST = '192.168.1.101'

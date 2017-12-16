@@ -32,7 +32,6 @@ local module = {}
 SDCARD_HOST = "127.0.0.1"
 SDCARD_PORT = 8000
 TARGET_PATH = "/home/flashair/data-logger"
-SYNC_DIR = "/tmp/sync"
 SSH_OPTS = ""
 SSH_USER = 'flashair'
 SSH_HOST = 'localhost'
@@ -63,14 +62,12 @@ function module.main()
     print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
     print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
     print("SSH_OPTS:   " .. SSH_OPTS)
-    print("SYNC dir:   " .. SYNC_DIR)
     print("TARGET path: " .. TARGET_PATH)
     if DEBUG then
         print("!!! DEBUG !!!")
     end
 
 	print("starting sync")
-    os.execute('mkdir -p ' .. SYNC_DIR)
 	files = flashair.dir_read("/CSVFILES/LOG")
 
     local syncer = fa_sync.Syncer(SSH_OPTS, SSH_USER, SSH_HOST, TARGET_PATH)

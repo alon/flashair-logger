@@ -25,7 +25,6 @@ SDCARD_HOST='{SDCARD_HOST}'
 SDCARD_PORT={SDCARD_PORT}
 SSH_USER='{SSH_USER}'
 TARGET_PATH='{TARGET_PATH}'
-SYNC_DIR='{SYNC_DIR}'
 DEBUG={DEBUG}
 """
 
@@ -37,7 +36,6 @@ def create_config(root_dir, debug, ssh_user):
     SSH_USER = ssh_user
     SSH_HOST = '127.0.0.1'
     TARGET_PATH = '/home/' + ssh_user + '/test'
-    SYNC_DIR = os.path.join(root_dir, 'sync_dir')
     DEBUG='true' if debug else 'false'
     as_flashair(ssh_user, 'rm -Rf {TARGET_PATH}'.format(**locals()))
     as_flashair(ssh_user, 'mkdir -p {TARGET_PATH}'.format(**locals()))
