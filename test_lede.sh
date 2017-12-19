@@ -83,12 +83,22 @@ if [ "x$CONNECT_TO_INTERNET" != "xno" ]; then
     S opkg update
     S opkg install luaposix luasocket
 else
-    wget http://downloads.lede-project.org/releases/17.01.0/targets/armvirt/generic/packages/librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
-    wget http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk
-    wget http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
-    C2 librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
-    S opkg install librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
-    S opkg install luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+    declare -a package_urls
+    declare -a package_names
+    package_urls=(
+        [0]=http://downloads.lede-project.org/releases/17.01.0/targets/armvirt/generic/packages/librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
+        [1]=http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk
+        [2]=http://downloads.lede-project.org/releases/17.01.0/packages/arm_cortex-a15_neon-vfpv4/packages/luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+    )
+    package_names=(
+        [0]=librt_1.1.16-1_arm_cortex-a15_neon-vfpv4.ipk
+        [1]=luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk
+        [2]=luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
+    )
+    for i in "${!package_urls[@]}"; do if [ ! -e "${package_names[i]}" ]; then wget "${package_urls[i]}"; fi; done
+    C2 "${package_names[@]}"
+    S opkg install "${package_names[0]}"
+    S opkg install "${package_names[1]}" "${package_names[2]}"
 fi
 cp lede.config.test.template lede.config.test
 echo "SSH_USER='$SSH_USER'" >> lede.config.test
