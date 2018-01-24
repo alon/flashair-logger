@@ -172,7 +172,7 @@ def main(HandlerClass=AirHTTPRequestHandler,
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--version', default=3, type=int, choices=[2, 3])
-    parser.add_argument('--dir', default='test-dir')
+    parser.add_argument('--dir', required=True)
     args = parser.parse_args()
     BASE_DIR = os.path.join(os.getcwd(), args.dir)
     AirHTTPRequestHandler.flashair_version = args.version
