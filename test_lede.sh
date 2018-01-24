@@ -2,8 +2,7 @@
 
 # Run a full LEDE distribution test using qemu-armvirt
 #
-# Start tmux
-# run qemu under it
+# run qemu in the background
 # qemu: install required packages
 # qemu: copy sources
 # qemu: copy config file
@@ -95,10 +94,13 @@ else
         [1]=luaposix_v33.2.1-5_arm_cortex-a15_neon-vfpv4.ipk
         [2]=luasocket_3.0-rc1-20130909-3_arm_cortex-a15_neon-vfpv4.ipk
     )
-    for i in "${!package_urls[@]}"; do if [ ! -e "${package_names[i]}" ]; then wget "${package_urls[i]}"; fi; done
-    C2 "${package_names[@]}"
-    S opkg install "${package_names[0]}"
-    S opkg install "${package_names[1]}" "${package_names[2]}"
+    (
+        cd cache
+        for i in "${!package_urls[@]}"; do if [ ! -e "${package_names[i]}" ]; then wget "${package_urls[i]}" -O "${package_names[i]}"; fi; done
+        C2 "${package_names[@]}"
+        S opkg install "${package_names[0]}"
+        S opkg install "${package_names[1]}" "${package_names[2]}"
+    )
 fi
 cp lede.config.test.template lede.config.test
 echo "SSH_USER='$SSH_USER'" >> lede.config.test
@@ -133,5 +135,5 @@ rsync -ra "$SSH_USER@localhost:$TARGET_PATH/" "$LOCALPATH/"
 echo "comparing"
 python3 -c "import test, os; os._exit(int(not test.is_same('$CSVROOT', '$LOCALPATH')))"
 EXIT_CODE=$?
-echo "result: $EXIT_CODE"
+echo "result: $EXIT_CODE (0 is good)"
 exit $EXIT_CODE
