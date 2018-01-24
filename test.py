@@ -65,9 +65,9 @@ def is_same(base1, base2):
     return True
 
 
-def run_sdcardemul_syncroot(syncroot, ssh_user):
+def run_sdcardemul_syncroot(syncroot, ssh_user, debug):
     # assemble
-    config_filename, target_path = create_config(syncroot, debug=False, ssh_user=ssh_user)
+    config_filename, target_path = create_config(syncroot, debug=debug, ssh_user=ssh_user)
     source_dir = os.path.join(syncroot, 'sd')
     csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
     os.makedirs(csv_dir)
@@ -106,17 +106,18 @@ def run_sdcardemul_syncroot(syncroot, ssh_user):
     assert new_mtimes == mtimes
 
 
-def run_sdcardemul(ssh_user):
+def run_sdcardemul(ssh_user, debug):
     os.system('killall sdcardemul.py')
 
     with TemporaryDirectory() as syncroot:
-        run_sdcardemul_syncroot(syncroot, ssh_user)
+        run_sdcardemul_syncroot(syncroot, ssh_user, debug)
 
 def main():
     parser = ArgumentParser()
     parser.add_argument('--ssh-user', default='flashair')
+    parser.add_argument('--debug', default=False, action='store_true')
     args = parser.parse_args()
-    run_sdcardemul(ssh_user=args.ssh_user)
+    run_sdcardemul(ssh_user=args.ssh_user, debug=args.debug)
 
 
 if __name__ == '__main__':
