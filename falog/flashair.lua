@@ -58,39 +58,21 @@ end
 function skip_headers(s)
     local found = 0
     local headers = {}
-    local state = "1"
-    while found == 0 do
+    local state = 0
+    local marker = {'\r', '\n', '\r', '\n'}
+    local ind = 0
+    while ind ~= #marker do
         -- print("state: " .. state .. "; reading 1")
         body = s:receive(1)
         if body == nil then
             break
         end
-        headers[#headers + 1] = body
-        if state == "1" then
-            if body == "\r" then
-                state = "2"
-            else
-                state = "1"
-            end
-        elseif state == "2" then
-            if body == "\n" then
-                state = "3"
-            else
-                state = "1"
-            end
-        elseif state == "3" then
-            if body == "\r" then
-                state = "4"
-            else
-                state = "1"
-            end
-        elseif state == "4" then
-            if body == "\n" then
-                break
-            else
-                state = "1"
-            end
+        if body == marker[ind + 1] then
+            ind = ind + 1
+        else
+            ind = 0
         end
+        headers[#headers + 1] = body
     end
     return table.concat(headers, "")
 end
