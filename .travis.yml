@@ -44,8 +44,8 @@ before_script:
   - echo 'StrictHostKeyChecking no' >> $HOME/.ssh/config
   - chmod 600 $HOME/.ssh/config
   - ssh -o StrictHostKeyChecking=no "$USER@localhost" echo "ssh works ok"
-  - ln -sf $HOME/images/lede.kernel .
-  - ls -l lede.kernel
+  - ln -sf $HOME/images/lede.kernel cache
+  - ls -l cache/lede.kernel
   - cat lede.key.pub >> $HOME/.ssh/authorized_keys
   - cat $HOME/.ssh/authorized_keys
 
