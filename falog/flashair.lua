@@ -96,7 +96,7 @@ function skip_headers(s)
 end
 
 
-function sdget(path)
+function module.sdget(path)
     s = sdget_stream(path)
     headers = skip_headers(s)
     -- print(headers)
@@ -105,16 +105,12 @@ function sdget(path)
 	return body
 end
 
-function module.csvfile_get(filename)
-	return sdget('/CSVFILES/LOG/' .. filename)
-end
-
 -- Parse the SD Air card's http server directory listing. It contains name, size, date and time for
 -- each file. date & time are not actually those, they are the top and bottom 16 bits of the seconds
 -- since epoch of the file. They are only used comparitavely, so it doesn't matter.
 function module.dir_read(path)
     -- Uses command.cgi: https://www.flashair-developers.com/en/documents/api/commandcgi/
-	body = sdget('/command.cgi?op=100&DIR=' .. path)
+	body = module.sdget('/command.cgi?op=100&DIR=' .. path)
 	files = {}
 	for k, v in ipairs((split(body, '\n'))) do
         -- print(k .. ': ' .. v)
