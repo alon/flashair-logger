@@ -1,3 +1,4 @@
 config.lua
-.rpoeproject
+.ropeproject
 __pycache__
+lede.config.test
