@@ -48,12 +48,13 @@ function C2 {
 
 trap killjobs EXIT
 
-IMAGE=$(pwd)/lede.kernel
+IMAGE=$(pwd)/cache/lede.kernel
 
 if [ ! -e "$IMAGE" ]; then
     echo "Missing LEDE image required for test"
     echo "Please download it from:"
     echo "http://lede-project.tetaneutral.net/releases/17.01.0/targets/armvirt/generic/lede-17.01.0-r3205-59508e3-armvirt-zImage-initramfs"
+    echo "to $IMAGE"
     exit -1
 fi
 
