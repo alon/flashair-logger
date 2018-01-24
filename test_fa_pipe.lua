@@ -2,7 +2,7 @@
 
 local fa_debug = require('fa_debug')
 
-fa_debug.set_debug()
+fa_debug.set_debug(true)
 
 DEBUGP(function () return 'test fa_pipe' end)
 

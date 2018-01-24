@@ -53,11 +53,7 @@ function module.main()
         dofile(arg[1])
     end
 
-    if DEBUG then
-        fa_debug.set_debug()
-    else
-        fa_debug.set_no_debug()
-    end
+    fa_debug.set_debug(DEBUG)
     print("Welcome to sync sd to remote")
     print("SD:         " .. SDCARD_HOST .. ':' .. SDCARD_PORT)
     print("SSH:        " .. SSH_USER .. ' at ' .. SSH_HOST)
