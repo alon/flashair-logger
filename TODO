@@ -1,2 +1,3 @@
-really don't keep file in memory - right now sdget is used twice.
-use gzip on both sides. 10x compression for CSV files on card.
+- use gzip on both sides. 10x compression for CSV files on card.
+- rename: this has nothing with logging (that's the above layer usage of this
+  layer), should be flashair-sync or somesuch.
