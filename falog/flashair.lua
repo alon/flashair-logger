@@ -8,6 +8,7 @@ http (socket.http) produces "Malformed request" errors with the sd httpd server,
 so just use socket directly.
 --]]
 
+local socket = require('socket')
 
 local module = {}
 

@@ -28,6 +28,10 @@ local flashair = require('falog.flashair')
 
 local module = {}
 
+-- Increment when a new release is made
+module.VERSION_MAJOR = 1
+module.VERSION_MINOR = 0
+
 -- Development defaults, use sdcardemul.py as the server.
 SDCARD_HOST = "127.0.0.1"
 SDCARD_PORT = 8000
