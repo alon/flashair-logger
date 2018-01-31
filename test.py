@@ -9,7 +9,7 @@ import time
 
 
 def cleanup():
-    os.system('killall sdcardemul.py')
+    os.system('killall flashairsim.py')
 
 
 atexit.register(cleanup)
@@ -65,13 +65,13 @@ def is_same(base1, base2):
     return True
 
 
-def run_sdcardemul_syncroot(syncroot, ssh_user, debug):
+def run_flashairsim_syncroot(syncroot, ssh_user, debug):
     # assemble
     config_filename, target_path = create_config(syncroot, debug=debug, ssh_user=ssh_user)
     source_dir = os.path.join(syncroot, 'sd')
     csv_dir = os.path.join(source_dir, 'CSVFILES', 'LOG')
     os.makedirs(csv_dir)
-    os.system('./sdcardemul.py --dir {source_dir} &'.format(**locals()))
+    os.system('./simulator/flashairsim.py --dir {source_dir} &'.format(**locals()))
     filenames = ['a.csv', 'b.csv', 'c.csv']
     for fname in filenames:
         with open(os.path.join(csv_dir, fname), 'w+') as fd:
@@ -106,18 +106,18 @@ def run_sdcardemul_syncroot(syncroot, ssh_user, debug):
     assert new_mtimes == mtimes
 
 
-def run_sdcardemul(ssh_user, debug):
-    os.system('killall sdcardemul.py')
+def run_flashairsim(ssh_user, debug):
+    os.system('killall flashairsim.py')
 
     with TemporaryDirectory() as syncroot:
-        run_sdcardemul_syncroot(syncroot, ssh_user, debug)
+        run_flashairsim_syncroot(syncroot, ssh_user, debug)
 
 def main():
     parser = ArgumentParser()
     parser.add_argument('--ssh-user', default='flashair')
     parser.add_argument('--debug', default=False, action='store_true')
     args = parser.parse_args()
-    run_sdcardemul(ssh_user=args.ssh_user, debug=args.debug)
+    run_flashairsim(ssh_user=args.ssh_user, debug=args.debug)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@
 # qemu: install required packages
 # qemu: copy sources
 # qemu: copy config file
-# host: start externally sdcardemul
+# host: start externally flashairsim
 # qemu: start test
 # host: verify results
 # uses ssh to prebuilt host user (can run another system for that host, even another LEDE system)
@@ -120,9 +120,9 @@ done
 ssh "$SSH_USER@localhost" rm -R "$TARGET_PATH" \; mkdir -p "$TARGET_PATH"
 
 # Start Flashair card simulator
-./sdcardemul.py --dir $SDROOT &
+./simulator/flashairsim.py --dir $SDROOT &
 
-echo waiting for sdcardemul
+echo waiting for flashairsim
 waitfortcp 192.168.1.101 8000
 S /root/sync_sd_to_remote /root/lede.config.test
 
