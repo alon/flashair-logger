@@ -1,3 +1,4 @@
+- debian package: use dpkg-buildpackage, including a proper changelog
 - use gzip on both sides. 10x compression for CSV files on card.
 - rename: this has nothing with logging (that's the above layer usage of this
   layer), should be flashair-sync or somesuch.
