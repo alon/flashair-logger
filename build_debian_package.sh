@@ -28,6 +28,7 @@ cp sync_sd_to_remote "$BIN/"
 cat > "$DEBIAN/control" <<EOF
 Package: flashair-logger
 Version: $VERSION
+Component: main
 Section: base
 Priority: optional
 Architecture: all
