@@ -1,19 +1,22 @@
-# travis-qemu [![Build Status](https://travis-ci.org/alon/flashair-gclogger.svg?branch=master)](https://travis-ci.org/alon/flashair-logger)
+[![Build Status](https://travis-ci.org/alon/flashair-gclogger.svg?branch=master)](https://travis-ci.org/alon/flashair-logger)
 
-Logging of the contents of an air SD card via an ssh connection.
+# Flashair Logger
 
-Logger makes the following assumptions:
-* HTTP connection to get directory listing and file contents
+Logging of the contents of a FlashAir v2 or v3 SD card via an SSH connection.
+
+Flashair-Logger makes the following assumptions / requirements:
+* FlashAir v2/v3 with known HTTP API for directory listing and file contents retrieval
 * Preferable to not use a temporary copy
-* ssh connection to destination
+* SSH connection available to destination
 * SD card files are in CSVFILES/LOG/ directory and there are no subdirectories (flat layout).
 
 Implementation:
-Using rsync would have been preferable, and is still possible with a file system in user space implementation. I have taken what was simpler to me, doing a very basic syncing based on a last synced date recorded in a file. I use the posix and socket lua extensions. Tested with openwrt 12.09 and lua 5.1.2
+Using rsync would have been preferable, and is still possible with a file
+system in user space implementation. Instead the list of files is sent to the
+target which returns the diff list whose contents is then sent.
 
-OpenWRT instructions:
-opkg install luasocket luaposix
-mkdir /root/.ssh
-chmod 700 /root/.ssh
-dropbearkey -t rsa /root/.ssh/id_rsa
+Uses the posix and socket lua extensions. Tested with openwrt 12.09 & debian 9
+and with Lua 5.1.2
 
+A LEDE package is no longer maintained, however a Debian one can be created
+with build_debian_package.sh
