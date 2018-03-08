@@ -30,7 +30,7 @@ local module = {}
 
 -- Increment when a new release is made
 module.VERSION_MAJOR = 1
-module.VERSION_MINOR = 0
+module.VERSION_MINOR = 1
 
 -- Development defaults, use sdcardemul.py as the server.
 SDCARD_HOST = "127.0.0.1"
